@@ -36,7 +36,9 @@ class CashDispenser
   end
 end
 
-cd = CashDispenser.new
-amt = 186.96
-puts "\n\ndispensing #{amt}"
-cd.dispense(amt)
+if __FILE__ == $0
+  cd = CashDispenser.new
+  amt = 186.92
+  puts "\n\ndispensing #{amt}"
+  cd.dispense(amt)
+end
