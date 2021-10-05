@@ -39,4 +39,4 @@ end
 cd = CashDispenser.new
 amt = 186.96
 puts "\n\ndispensing #{amt}"
-cd.dispense(186.87)
+cd.dispense(amt)
