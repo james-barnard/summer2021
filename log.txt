@@ -1,0 +1,13 @@
+day 1 9-28-21
+  install brew, rvm, ruby 2.7
+  check out two books
+    Eloquent Ruby
+    Well Grounded Rubist
+day 2 9-29-21
+  buy book
+  read chapter 1
+  make up an exercise that demonstrates ch 1 content
+    send it to me for my input
+    do it
+day 3
+
