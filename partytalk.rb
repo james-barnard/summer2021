@@ -1,92 +1,98 @@
 require 'pry-byebug'
 
-PARTYTALK_TRANSCRIPT = "overheard.log"
-TRAINING_TIP = "Just hit enter when you run out of clever things to say for the mic"
-CONVERSATION_TIP = "Just hit enter when you leave the room"
-
 class PartyTalk
-  attr_reader :partier, :last_response
+  #simulates casual, social conversation
+  #prompts for random comments, topics, questions
+  #remembers what ppl say
+  #regurgitates bits of text
 
   def initialize
-    @partier = prompt_for("What is your name?")
-    @modes = [:training, :conversing]
+    @modes = %i[ comment topic question ]
+    @prompts = {
+      comment: "Make a comment, now",
+      topic: "Suggest a topic for discussion",
+      question: "Time to ask a question"
+    }
+    @responses = {
+      comment: ["initial comment"],
+      topic: [],
+      question: ["initial question"]
+    }
+    #load_previous_conversations
   end
 
   def run
-    while true do # training
-      hint
-      next if capture
+    while true do
+      reset_mode
 
+      capture
       break if stop
-      toggle_mode
     end
+
+    puts "goodbye, turn out the lights!"
   end
 
   private
 
-  def capture
-    @last_response = prompt_for(prompt)
+  attr_reader :mode, :responses
 
-    if notable_response?
-      File.open(PARTYTALK_TRANSCRIPT, 'a+') { |f| f.puts "#{mode}|#{last_response}" }
-    else
-      return nil
-    end
+  def say_something
+    need_training? ? prompt : self.send("#{mode.to_s}_prompt")
   end
 
-  def stop
-    last_response == 'stop'
-  end
-
-  def notable_response?
-    last_response && last_response.size > 10
+  def need_training?
+    @responses[mode].size < 2
   end
 
   def prompt
-    {
-      training:   "Hi #{partier}, say something clever for the mic",
-      conversing: "Hey, what about those Cowboys?"
-    }[mode]
+    @prompts[mode]
   end
 
-  def tips
-    {
-      training:   "Just hit enter when you run out of clever things to say for the mic",
-      conversing: "Please turn out the lights by typing stop when you leave"
-    }
+  def topic_prompt
+    prompt = "what do you think about #{responses[mode].sample}?"
+    mode = :comment
+    prompt
   end
 
-  def tip
-    tips[mode]
+  def comment_prompt
+    "I heard someone say #{responses[mode].sample}"
   end
 
-  def prompt_for(prompt)
-    clear 12
-    print "#{prompt} >> "
+  def question_prompt
+    prompt = "#{responses[mode].sample}?"
+    mode = :comment
+    prompt
+  end
+
+  def stop
+    %w[stop exit quit].any? {|word| word == last_response}
+  end
+
+  def reset_mode
+    @mode = @modes.sample
+  end
+
+  def last_response
+    responses[mode].last || ''
+  end
+
+  def capture
+    responses[mode] << user_input
+  end
+
+  def user_input
+    ambiance
+    print "#{say_something} >> "
     gets.chomp
   end
 
-  def hint
-    clear 12
-    puts "hint: " + tip
-    clear 10
-  end
-
-  def clear(cnt=20)
-    cnt.times { puts '' }
-  end
-
-  def mode
-    @modes.first
-  end
-
-  def toggle_mode
-    @modes = @modes.rotate
+  def ambiance
+    #12.times { puts "you said " + last_response } unless last_response == ''
+    puts "the mode is: " + mode.to_s
   end
 end
 
 if __FILE__ == $0
-  20.times { puts '' }
-  PartyTalk.new.run
-  puts "Turn out the lights!  The party is over!!!!!"
+  party = PartyTalk.new
+  party.run
 end
